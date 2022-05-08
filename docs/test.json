@@ -1,0 +1,26 @@
+{
+    "start": {
+        "lines": [
+            {
+                "string": "Yoooo! This is an empty project!"
+            }
+        ],
+        "links": [
+            {
+                "keys": [
+                    "next",
+                    "further",
+                    "advance"
+                ],
+                "id": "end"
+            }
+        ]
+    },
+    "end": {
+        "lines": [
+            {
+                "string": "and this is second line!"
+            }
+        ]
+    }
+}
