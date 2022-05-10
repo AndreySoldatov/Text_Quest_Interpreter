@@ -9,13 +9,18 @@
 #include "json.hpp"
 #include "TextPrinter.hpp"
 #include "InputField.hpp"
+#include "MusicPlayer.hpp"
+
+#define  DBGLINE(N) std::cout << N << "\n"
 
 using namespace nlohmann;
 
 void fillBlock(
         std::string const &id, json &js,
+        json const &defaults,
         std::vector<TextPrinter> &printers,
-        sf::Music &mus,
+        std::array<MusicPlayer, 2> &players,
+        size_t &currentPlayer,
         sf::Color &backgroundColor,
         InputField &input,
         TextPrinter &message,
@@ -25,38 +30,89 @@ void fillBlock(
         sf::Shader &shader,
         std::filesystem::path const &programPath,
         std::filesystem::path const &gamePath) {
-    mus.stop();
+    DBGLINE("Loading music");
+
     if(js[id].contains("music")) {
-        mus.openFromFile(gamePath.string() + "\\music\\" + (std::string)js[id]["music"]["file"]);
+        std::string musicPath = gamePath.string() + "\\music\\" + (std::string)js[id]["music"]["file"];
+        float volume{100};
         if(js[id]["music"].contains("volume")) {
-            mus.setVolume(js[id]["music"]["volume"]);
+            volume = js[id]["music"]["volume"];
         }
-        mus.setLoop(true);
-        mus.play();
+        if(!players[currentPlayer].isSame(musicPath)) {
+            players[currentPlayer].fadeOut();
+            currentPlayer = (currentPlayer + 1) % 2;
+            players[currentPlayer].setPath(musicPath);
+            players[currentPlayer].fadeIn(volume);
+        } else {
+            players[currentPlayer].setVolume(volume);
+        }
     }
 
-    if(js[id].contains("font")) {
+    DBGLINE("Loading fonts");
+
+    bool jsContainsFont{js[id].contains("font")};
+    bool defaultsContainsFont{defaults.contains("font")};
+
+    if(jsContainsFont) {
         if(js[id]["font"].contains("regular")) {
-            fonts[0].loadFromFile(gamePath.string() + "\\fonts\\" + (std::string)js[id]["font"]["regular"]);
+            fonts[0].loadFromFile(gamePath.string() + "\\fonts\\" + (std::string) js[id]["font"]["regular"]);
         }
-        if(js[id]["font"].contains("italic")) {
-            fonts[1].loadFromFile(gamePath.string() + "\\fonts\\" + (std::string)js[id]["font"]["italic"]);
-        }
-        if(js[id]["font"].contains("bold")) {
-            fonts[2].loadFromFile(gamePath.string() + "\\fonts\\" + (std::string)js[id]["font"]["bold"]);
-        }
-        if(js[id]["font"].contains("boldItalic")) {
-            fonts[3].loadFromFile(gamePath.string() + "\\fonts\\" + (std::string)js[id]["font"]["boldItalic"]);
+    } else if(defaultsContainsFont) {
+        if(defaults["font"].contains("regular")) {
+            fonts[0].loadFromFile(gamePath.string() + "\\fonts\\" + (std::string) defaults["font"]["regular"]);
         }
     } else {
         fonts[0].loadFromFile((programPath / "fonts\\regular.ttf").string());
+    }
+    DBGLINE("\tLoaded regular");
+
+    if(jsContainsFont) {
+        if(js[id]["font"].contains("italic")) {
+            fonts[1].loadFromFile(gamePath.string() + "\\fonts\\" + (std::string) js[id]["font"]["italic"]);
+        }
+    } else if(defaultsContainsFont) {
+        if(defaults["font"].contains("italic")) {
+            fonts[1].loadFromFile(gamePath.string() + "\\fonts\\" + (std::string) defaults["font"]["italic"]);
+        }
+    } else {
         fonts[1].loadFromFile((programPath / "fonts\\italic.ttf").string());
+    }
+    DBGLINE("\tLoaded italic");
+
+    if(jsContainsFont) {
+        if(js[id]["font"].contains("bold")) {
+            fonts[2].loadFromFile(gamePath.string() + "\\fonts\\" + (std::string) js[id]["font"]["bold"]);
+        }
+    } else if(defaultsContainsFont) {
+        if(defaults["font"].contains("bold")) {
+            fonts[2].loadFromFile(gamePath.string() + "\\fonts\\" + (std::string) defaults["font"]["bold"]);
+        }
+    } else {
         fonts[2].loadFromFile((programPath / "fonts\\bold.ttf").string());
+    }
+    DBGLINE("\tLoaded bold");
+
+    if(jsContainsFont) {
+        if(js[id]["font"].contains("boldItalic")) {
+            fonts[3].loadFromFile(gamePath.string() + "\\fonts\\" + (std::string) js[id]["font"]["boldItalic"]);
+        }
+    } else if(defaultsContainsFont) {
+        if(defaults["font"].contains("boldItalic")) {
+            fonts[3].loadFromFile(gamePath.string() + "\\fonts\\" + (std::string) defaults["font"]["boldItalic"]);
+        }
+    } else {
         fonts[3].loadFromFile((programPath / "fonts\\boldItalic.ttf").string());
     }
+    DBGLINE("\tLoaded boldItalic");
 
+    DBGLINE("Loading shader");
     if(js[id].contains("shader")) {
         std::ifstream ifs(gamePath.string() + "\\shaders\\" + (std::string)js[id]["shader"]);
+        std::stringstream ss;
+        ss << ifs.rdbuf();
+        shader.loadFromMemory(ss.str(), sf::Shader::Fragment);
+    } else if(defaults.contains("shader")) {
+        std::ifstream ifs(gamePath.string() + "\\shaders\\" + (std::string)defaults["shader"]);
         std::stringstream ss;
         ss << ifs.rdbuf();
         shader.loadFromMemory(ss.str(), sf::Shader::Fragment);
@@ -67,16 +123,26 @@ void fillBlock(
         shader.loadFromMemory(ss.str(), sf::Shader::Fragment);
     }
 
+    DBGLINE("Loading bgColor");
     if(js[id].contains("backgroundColor")) {
         backgroundColor.r = js[id]["backgroundColor"][0];
         backgroundColor.g = js[id]["backgroundColor"][1];
         backgroundColor.b = js[id]["backgroundColor"][2];
+    } else if(defaults.contains("backgroundColor")) {
+        backgroundColor.r = defaults["backgroundColor"][0];
+        backgroundColor.g = defaults["backgroundColor"][1];
+        backgroundColor.b = defaults["backgroundColor"][2];
     } else {
-        backgroundColor = sf::Color::Black;
+        backgroundColor = sf::Color(20, 20, 20);
     }
 
+    DBGLINE("Loading textColor");
     if(js[id].contains("textColor")) {
         sf::Color c{js[id]["textColor"][0], js[id]["textColor"][1], js[id]["textColor"][2]};
+        input.setColor(c);
+        message.setColor(c);
+    } else if(defaults.contains("textMiscColor")) {
+        sf::Color c{defaults["textMiscColor"][0], defaults["textMiscColor"][1], defaults["textMiscColor"][2]};
         input.setColor(c);
         message.setColor(c);
     } else {
@@ -84,23 +150,57 @@ void fillBlock(
         message.setColor(sf::Color::White);
     }
 
+    DBGLINE("Loading line");
     printers.clear();
     for(auto &line : js[id]["lines"]) {
         size_t fontIndex{};
+        DBGLINE("\tLoading font");
         if(line.contains("font")) {
             if(line["font"] == "regular") fontIndex = 0;
             if(line["font"] == "italic") fontIndex = 1;
             if(line["font"] == "bold") fontIndex = 2;
             if(line["font"] == "boldItalic") fontIndex = 3;
+        } else if(defaults.contains("fontStyle")) {
+            if(defaults["fontStyle"] == "regular") fontIndex = 0;
+            if(defaults["fontStyle"] == "italic") fontIndex = 1;
+            if(defaults["fontStyle"] == "bold") fontIndex = 2;
+            if(defaults["fontStyle"] == "boldItalic") fontIndex = 3;
         }
+
+        DBGLINE("\tLoading textColor");
+        sf::Color textColor = sf::Color::White;
+        if(line.contains("textColor")) {
+            textColor = sf::Color(line["textColor"][0], line["textColor"][1], line["textColor"][2]);
+        } else if(defaults.contains("textTypeColor")) {
+            textColor = sf::Color(defaults["textTypeColor"][0], defaults["textTypeColor"][1], defaults["textTypeColor"][2]);
+        }
+
+        DBGLINE("\tLoading textSize");
+        float textSize{32.0f};
+        if(line.contains("textSize")) {
+            textSize = (float)line["textSize"];
+        } else if(defaults.contains("textSize")) {
+            textSize = (float)defaults["textSize"];
+        }
+
+        DBGLINE("\tLoading del");
+        size_t del{30};
+        if(line.contains("del")) {
+            del = line["del"];
+        } else if(defaults.contains("del")) {
+            del = defaults["del"];
+        }
+
         printers.emplace_back(TextPrinter(
                 fonts[fontIndex],
                 line["string"],
-                (line.contains("textColor") ? sf::Color(line["textColor"][0], line["textColor"][1], line["textColor"][2]) : sf::Color::White),
+                textColor,
                 pos,
-                (line.contains("textSize") ? (float)line["textSize"] : 32.0f),
-                (line.contains("del") ? (float)line["del"] : 30)
+                textSize,
+                del
         ));
+
+        DBGLINE("\tLoading sound");
         if(line.contains("sound")) {
             float volume{100};
             if(line["sound"].contains("volume")) {
@@ -116,6 +216,11 @@ void fillBlock(
             if(line["typeSound"].contains("volume")) {
                 typingVolume = (float)line["typeSound"]["volume"];
             }
+        } else if(defaults.contains("typeSound")) {
+            typingSoundPath = gamePath.string() + "\\sounds\\" + (std::string)defaults["typeSound"]["file"];
+            if(defaults["typeSound"].contains("volume")) {
+                typingVolume = (float)defaults["typeSound"]["volume"];
+            }
         } else {
             typingSoundPath = programPath.string() + "\\sounds\\typeSound.ogg";
         }
@@ -124,6 +229,7 @@ void fillBlock(
         pos.y += printers[printers.size() - 1].getBoundBox().y + 40.0;
     }
 
+    DBGLINE("Loading regs");
     reg.clear();
     for (size_t i = 0; i < js[id]["links"].size(); ++i) {
         std::string regStr;
@@ -136,6 +242,7 @@ void fillBlock(
         reg.emplace_back(std::regex(regStr, std::regex_constants::icase));
     }
 
+    DBGLINE("Saving\n");
     std::ofstream saveFile(gamePath.string() + "\\save\\saveFile", std::ios::trunc);
     saveFile << id;
     saveFile.close();
@@ -152,6 +259,24 @@ int main([[maybe_unused]]int argc, char** argv) {
     std::ifstream ifs(argv[1]);
     json js;
     ifs >> js;
+    ifs.close();
+
+    for(auto &f : std::filesystem::directory_iterator(gamePath / "src")) {
+        std::ifstream tmpIfs(f.path());
+        json tmpJs;
+        tmpIfs >> tmpJs;
+        tmpIfs.close();
+        for (auto &element : tmpJs.items()) {
+            js.emplace(element.key(), element.value());
+        }
+    }
+
+    std::cout << js.dump(2) << "\n";
+
+    std::ifstream defaultsFile(gamePath.string() + "\\defaults\\defaults.tqi");
+    json defaults;
+    defaultsFile >> defaults;
+    defaultsFile.close();
 
     sf::Clock deltaTimeClock;
     float oldTime{};
@@ -190,7 +315,9 @@ int main([[maybe_unused]]int argc, char** argv) {
         currentId = ss.str();
     }
 
-    sf::Music mus;
+    std::array<MusicPlayer, 2> musicPlayers;
+    size_t currentPlayer{};
+
     sf::Color backgroundColor = sf::Color::Black;
     std::vector<std::regex> regs;
 
@@ -205,7 +332,8 @@ int main([[maybe_unused]]int argc, char** argv) {
 
     sf::Shader shader;
 
-    fillBlock(currentId, js, printers, mus, backgroundColor, input, message, regs, fonts, pos, shader, programPath, gamePath);
+    std::cout << "Starting to fill block\n";
+    fillBlock(currentId, js, defaults, printers, musicPlayers, currentPlayer, backgroundColor, input, message, regs, fonts, pos, shader, programPath, gamePath);
 
     sf::RectangleShape pad;
     pad.setSize({1600, 32 * 5});
@@ -248,7 +376,7 @@ int main([[maybe_unused]]int argc, char** argv) {
                             } else if(js[currentId]["links"][i].contains("id")) {
                                 currentId = js[currentId]["links"][i]["id"];
                                 pos.y = 100;
-                                fillBlock(currentId, js, printers, mus, backgroundColor, input, message, regs, fonts, pos, shader, programPath, gamePath);
+                                fillBlock(currentId, js, defaults, printers, musicPlayers, currentPlayer, backgroundColor, input, message, regs, fonts, pos, shader, programPath, gamePath);
                                 currentPrinter = 0;
                                 printers[currentPrinter].start();
                                 pad.setFillColor(backgroundColor);
@@ -264,6 +392,8 @@ int main([[maybe_unused]]int argc, char** argv) {
                     if(!found) {
                         if(js[currentId].contains("defaultMessage")) {
                             message.setString(js[currentId]["defaultMessage"]);
+                        } else if(defaults.contains("defaultMessage")) {
+                            message.setString(defaults["defaultMessage"]);
                         } else {
                             message.setString("Unknown command");
                         }
@@ -318,6 +448,10 @@ int main([[maybe_unused]]int argc, char** argv) {
 
         if(currentPrinter == printers.size() - 1 && printers[currentPrinter].finished() && !input.isActive()) {
             input.setActive(true);
+        }
+
+        for (auto &player : musicPlayers) {
+            player.update(dt);
         }
 
         for (auto &p : printers) {
