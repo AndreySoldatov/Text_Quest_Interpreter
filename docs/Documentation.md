@@ -16,6 +16,8 @@ made for ["The Tool Jam 2"](https://itch.io/jam/the-tool-jam-2).
 - [Block Parameters](#block-parameters)
 - [Shaders](#shaders)
 - [Saves, usage and misc](#saves-usage-and-misc)
+- [Defaults](#defaults)
+- [Multiple Source files](#multiple-source-files)
 
 # Quick Start
 To create your very own text quest first thing you need to do is to use ***Text Quest Interpreter Project Wizard TM***. Usage is simple:
@@ -301,5 +303,27 @@ This engine has autosave feature. Eeach project has folder `save` that `saveFile
 In the game pressing `F4` will toggle fullscreen mode.
 `Enter` will advance the story, or evaluate input.
 `Escape` exits the game.
+
+# Defaults
+In every TQI project there is a `defaults/defaults.tqi` file
+that contains all the default values for the game.
+By default (pun not intended) it looks like this:
+```json
+{
+  "backgroundColor": [20, 20, 20], // Obvious
+  "textTypeColor": [255, 255, 255], // Color of printed text
+  "textMiscColor": [255, 255, 255], // Color of input and message
+  "textSize": 32, // Size of printed text
+  "del": 30, // delimeter
+  "defaultMessage": "Unknown command", // default message
+  "fontStyle": "regular", // default font style
+  "font": {} // default font files
+}
+```
+Also you can specify default `"typingSound"` for the sound of printed text.
+
+# Multiple Source files
+You can add any number of `.tqi` in the `/src/` folder of your project.
+They behave exactly like the main `.tqi` file, and by that i mean that you can define block in them. You can even link to the blocks of the other file, they will all link together anyway.
 
 Thats all you need to know about TQI folks!

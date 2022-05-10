@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_executable(TextQuestInter
         main.cpp TextPrinter.cpp TextPrinter.hpp json.hpp #Block.cpp Block.hpp
-        InputField.cpp InputField.hpp)
+        InputField.cpp InputField.hpp MusicPlayer.cpp MusicPlayer.hpp)
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
     target_link_libraries(TextQuestInter sfml-graphics-d)

@@ -12,7 +12,12 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="efea6ddf-9254-4bea-afa1-7fd1728f5893" name="Default Changelist" comment="" />
+    <list default="true" id="efea6ddf-9254-4bea-afa1-7fd1728f5893" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/Documentation.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/Documentation.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/main.cpp" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -23,14 +28,19 @@
     <option name="formatViaClangd" value="false" />
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Release" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="MacroExpansionManager">
     <option name="directoryName" value="PbfMbJKj" />
   </component>
   <component name="ProjectId" id="28kR0m2KYcklresMM5MbmcXe0Gr" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="PropertiesComponent">
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="nodejs_package_manager_path" value="npm" />
-    <property name="settings.editor.selected.configurable" value="CMakeSettings" />
+    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors.Language Defaults" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -50,7 +60,7 @@
     </option>
   </component>
   <component name="RunManager">
-    <configuration name="TextQuestInter" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="C:\Users\Andrey\Desktop\TextQuestInterpreter\default_test\testProj.tqi" PASS_PARENT_ENVS_2="true" PROJECT_NAME="TextQuestInter" TARGET_NAME="TextQuestInter" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="TextQuestInter" RUN_TARGET_NAME="TextQuestInter">
+    <configuration name="TextQuestInter" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="C:\Users\Andrey\Desktop\TextQuestInter\testGame\testProj.json" PASS_PARENT_ENVS_2="true" PROJECT_NAME="TextQuestInter" TARGET_NAME="TextQuestInter" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="TextQuestInter" RUN_TARGET_NAME="TextQuestInter">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -68,11 +78,26 @@
       <updated>1651758376831</updated>
       <workItem from="1651758378201" duration="18286000" />
       <workItem from="1651840633339" duration="43432000" />
-      <workItem from="1652000673262" duration="10961000" />
+      <workItem from="1652000673262" duration="12631000" />
+      <workItem from="1652182986459" duration="518000" />
+      <workItem from="1652183531354" duration="14128000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>
