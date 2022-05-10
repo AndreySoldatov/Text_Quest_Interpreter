@@ -24,7 +24,7 @@ void fillBlock(
         sf::Color &backgroundColor,
         InputField &input,
         TextPrinter &message,
-        std::vector<std::regex> &reg,
+        std::vector<std::wregex> &reg,
         std::array<sf::Font, 4> &fonts,
         sf::Vector2f &pos,
         sf::Shader &shader,
@@ -151,6 +151,8 @@ void fillBlock(
     }
 
     DBGLINE("Loading line");
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+
     printers.clear();
     for(auto &line : js[id]["lines"]) {
         size_t fontIndex{};
@@ -193,7 +195,7 @@ void fillBlock(
 
         printers.emplace_back(TextPrinter(
                 fonts[fontIndex],
-                line["string"],
+                converter.from_bytes(line["string"]),
                 textColor,
                 pos,
                 textSize,
@@ -232,14 +234,14 @@ void fillBlock(
     DBGLINE("Loading regs");
     reg.clear();
     for (size_t i = 0; i < js[id]["links"].size(); ++i) {
-        std::string regStr;
+        std::wstring regStr;
         for (size_t j = 0; j < js[id]["links"][i]["keys"].size(); j++) {
-            regStr.append(js[id]["links"][i]["keys"][j]);
+            regStr.append(converter.from_bytes(js[id]["links"][i]["keys"][j]));
             if(j < js[id]["links"][i]["keys"].size() - 1) {
-                regStr += "|";
+                regStr += L"|";
             }
         }
-        reg.emplace_back(std::regex(regStr, std::regex_constants::icase));
+        reg.emplace_back(std::wregex(regStr, std::regex_constants::icase));
     }
 
     DBGLINE("Saving\n");
@@ -319,14 +321,14 @@ int main([[maybe_unused]]int argc, char** argv) {
     size_t currentPlayer{};
 
     sf::Color backgroundColor = sf::Color::Black;
-    std::vector<std::regex> regs;
+    std::vector<std::wregex> regs;
 
     std::vector<sf::SoundBuffer> buffers;
 
     InputField input(inpPos, fonts[0], 32);
     input.setTypingSound(programPath.string() + "\\sounds\\inputSound.ogg");
 
-    TextPrinter message(fonts[0], "", sf::Color::White, {inpPos.x, inpPos.y + 2 * 32});
+    TextPrinter message(fonts[0], L"", sf::Color::White, {inpPos.x, inpPos.y + 2 * 32});
     message.setTypingSound(programPath.string() + "\\sounds\\typeSound.ogg");
     message.start();
 
@@ -344,6 +346,8 @@ int main([[maybe_unused]]int argc, char** argv) {
     texture.create(1600, 900);
 
     shader.setUniform("scale", sf::Vector2f{1600, 900});
+
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
 
     while (window.isOpen()) {
         dt = deltaTimeClock.getElapsedTime().asSeconds() - oldTime;
@@ -366,12 +370,11 @@ int main([[maybe_unused]]int argc, char** argv) {
                 } else if(printers[currentPrinter].finished() && currentPrinter < printers.size() - 1) {
                     printers[++currentPrinter].start();
                 } if(input.isActive()) {
-                    std::string str(input.getString().begin(), input.getString().end());
                     bool found{false};
                     for (size_t i = 0; i < regs.size(); i++) {
-                        if(std::regex_search(str, regs[i])) {
+                        if(std::regex_search(input.getString(), regs[i])) {
                             if(js[currentId]["links"][i].contains("message")) {
-                                message.setString(js[currentId]["links"][i]["message"]);
+                                message.setString(converter.from_bytes(js[currentId]["links"][i]["message"]));
                                 message.setPosition({inpPos.x - message.getBoundBox().x / 2, inpPos.y + 32 * 2});
                             } else if(js[currentId]["links"][i].contains("id")) {
                                 currentId = js[currentId]["links"][i]["id"];
@@ -381,7 +384,7 @@ int main([[maybe_unused]]int argc, char** argv) {
                                 printers[currentPrinter].start();
                                 pad.setFillColor(backgroundColor);
                                 input.setActive(false);
-                                message.setString("");
+                                message.setString(L"");
                             }
                             found = true;
                             message.start();
@@ -391,11 +394,11 @@ int main([[maybe_unused]]int argc, char** argv) {
                     }
                     if(!found) {
                         if(js[currentId].contains("defaultMessage")) {
-                            message.setString(js[currentId]["defaultMessage"]);
+                            message.setString(converter.from_bytes(js[currentId]["defaultMessage"]));
                         } else if(defaults.contains("defaultMessage")) {
-                            message.setString(defaults["defaultMessage"]);
+                            message.setString(converter.from_bytes(defaults["defaultMessage"]));
                         } else {
-                            message.setString("Unknown command");
+                            message.setString(L"Unknown command");
                         }
                         message.setPosition({inpPos.x - message.getBoundBox().x / 2, inpPos.y + 32 * 2});
                         message.start();
@@ -424,7 +427,7 @@ int main([[maybe_unused]]int argc, char** argv) {
             }
 
             if(event.type == sf::Event::MouseWheelScrolled) {
-                scrollSpeed += event.mouseWheelScroll.delta * dt * 100.0f;
+                scrollSpeed += event.mouseWheelScroll.delta * dt * 200.0f;
             }
 
             input.processInput(event);

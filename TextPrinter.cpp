@@ -8,7 +8,7 @@
 
 TextPrinter::TextPrinter(
         sf::Font const &font,
-        const std::string &str,
+        const std::wstring &str,
         const sf::Color &textColor,
         sf::Vector2f const &pos,
         size_t textSize,
@@ -37,7 +37,7 @@ void TextPrinter::draw(sf::RenderTarget &window) {
 void TextPrinter::start() {
     m_isTyping = true;
     m_clock.restart();
-    m_typingString = "";
+    m_typingString = L"";
     m_text.setString(m_typingString);
 
     m_TypingSound.setBuffer(m_TypingSoundBuffer);
@@ -83,9 +83,9 @@ void TextPrinter::setPosition(sf::Vector2f const &pos) {
     m_text.setPosition(m_pos);
 }
 
-void TextPrinter::setString(std::string const &str) {
+void TextPrinter::setString(std::wstring const &str) {
     m_fullString = str;
-    m_typingString = "";
+    m_typingString = L"";
 }
 
 bool TextPrinter::finished() {

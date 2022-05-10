@@ -5,7 +5,9 @@
 This is the documentation for the Text Quest Interpreter
 made for ["The Tool Jam 2"](https://itch.io/jam/the-tool-jam-2).
 
-***WARNING: ONLY ASCII CHARACTERS ARE SUPPORTED AT THE MOMENT***
+~~***WARNING: ONLY ASCII CHARACTERS ARE SUPPORTED AT THE MOMENT***~~
+
+***YOOOOOOO ALL UNICODE IS WELCOME NOW!🎉🎉🎉***
 
 ### Table of contents
 - [Text Quest Interpreter Documentation](#text-quest-interpreter-documentation)
@@ -172,8 +174,10 @@ when all effects are put together it will look something like this:
 }
 ```
 end will emit this text line:
-<p style = "color:rgb(235, 83, 70); font-size:64px;font-weight: bold; font-style: italic;">Yoooo! This is an empty project!</p>
-(markdown cannot provide delimeter and sound support for obvious reasons, but I hope you get the idea)
+
+![Yoo](stringExample.gif)
+
+(GIF cannot provide sound support for obvious reasons, but I hope you get the idea)
 
 # Block Parameters
 You can add even more customization by adding global block settings:

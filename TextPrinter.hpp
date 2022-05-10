@@ -9,8 +9,8 @@
 #include <SFML/Audio.hpp>
 
 class TextPrinter {
-    std::string m_fullString;
-    std::string m_typingString;
+    std::wstring m_fullString;
+    std::wstring m_typingString;
     sf::Text m_text;
     sf::Color m_textColor;
     sf::Clock m_clock;
@@ -28,7 +28,7 @@ public:
     TextPrinter() = delete;
     explicit TextPrinter(
             sf::Font const &font,
-            std::string const &str = "This is a default sentence.\nNew line!",
+            std::wstring const &str = L"This is a default sentence.\nNew line!",
             sf::Color const &textColor = sf::Color::White,
             sf::Vector2f const &pos = {100, 100},
             size_t textSize = 32,
@@ -48,7 +48,7 @@ public:
 
     void update();
 
-    void setString(std::string const &str);
+    void setString(std::wstring const &str);
 
     sf::Vector2f getBoundBox();
 

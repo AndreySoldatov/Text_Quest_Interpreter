@@ -14,7 +14,8 @@
   <component name="ChangeListManager">
     <list default="true" id="efea6ddf-9254-4bea-afa1-7fd1728f5893" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TextPrinter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/TextPrinter.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TextPrinter.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/TextPrinter.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/Documentation.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/Documentation.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/main.cpp" afterDir="false" />
     </list>
@@ -27,7 +28,7 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Release" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
@@ -80,7 +81,7 @@
       <workItem from="1651840633339" duration="43432000" />
       <workItem from="1652000673262" duration="12631000" />
       <workItem from="1652182986459" duration="518000" />
-      <workItem from="1652183531354" duration="14128000" />
+      <workItem from="1652183531354" duration="17542000" />
     </task>
     <servers />
   </component>
