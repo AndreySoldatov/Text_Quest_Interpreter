@@ -10,6 +10,7 @@
 #include "TextPrinter.hpp"
 #include "InputField.hpp"
 #include "MusicPlayer.hpp"
+#include "ColorFader.hpp"
 
 #define  DBGLINE(N) std::cout << N << "\n"
 
@@ -21,7 +22,7 @@ void fillBlock(
         std::vector<TextPrinter> &printers,
         std::array<MusicPlayer, 2> &players,
         size_t &currentPlayer,
-        sf::Color &backgroundColor,
+        ColorFader &backgroundColor,
         InputField &input,
         TextPrinter &message,
         std::vector<std::wregex> &reg,
@@ -46,6 +47,8 @@ void fillBlock(
         } else {
             players[currentPlayer].setVolume(volume);
         }
+    } else {
+        players[currentPlayer].fadeOut();
     }
 
     DBGLINE("Loading fonts");
@@ -125,15 +128,11 @@ void fillBlock(
 
     DBGLINE("Loading bgColor");
     if(js[id].contains("backgroundColor")) {
-        backgroundColor.r = js[id]["backgroundColor"][0];
-        backgroundColor.g = js[id]["backgroundColor"][1];
-        backgroundColor.b = js[id]["backgroundColor"][2];
+        backgroundColor.setColor({js[id]["backgroundColor"][0], js[id]["backgroundColor"][1], js[id]["backgroundColor"][2]});
     } else if(defaults.contains("backgroundColor")) {
-        backgroundColor.r = defaults["backgroundColor"][0];
-        backgroundColor.g = defaults["backgroundColor"][1];
-        backgroundColor.b = defaults["backgroundColor"][2];
+        backgroundColor.setColor({defaults["backgroundColor"][0], defaults["backgroundColor"][1], defaults["backgroundColor"][2]});
     } else {
-        backgroundColor = sf::Color(20, 20, 20);
+        backgroundColor.setColor(sf::Color(20, 20, 20));
     }
 
     DBGLINE("Loading textColor");
@@ -211,6 +210,10 @@ void fillBlock(
             printers[printers.size() - 1].setSound(gamePath.string() + "\\sounds\\" + (std::string)line["sound"]["file"], volume);
         }
 
+        if(line.contains("shaking")) {
+            printers[printers.size() - 1].setShaking(true);
+        }
+
         float typingVolume{100};
         std::string typingSoundPath;
         if(line.contains("typeSound")) {
@@ -235,13 +238,19 @@ void fillBlock(
     reg.clear();
     for (size_t i = 0; i < js[id]["links"].size(); ++i) {
         std::wstring regStr;
-        for (size_t j = 0; j < js[id]["links"][i]["keys"].size(); j++) {
-            regStr.append(converter.from_bytes(js[id]["links"][i]["keys"][j]));
-            if(j < js[id]["links"][i]["keys"].size() - 1) {
-                regStr += L"|";
+        if(js[id]["links"][i].contains("keys")) {
+            for (size_t j = 0; j < js[id]["links"][i]["keys"].size(); j++) {
+                regStr.append(converter.from_bytes(js[id]["links"][i]["keys"][j]));
+                if (j < js[id]["links"][i]["keys"].size() - 1) {
+                    regStr += L"|";
+                }
             }
+            reg.emplace_back(std::wregex(regStr, std::regex_constants::icase));
+        } else if(js[id]["links"][i].contains("any")) {
+            reg.emplace_back(std::wregex(L".*", std::regex_constants::icase));
+        } else if(js[id]["links"][i].contains("none")) {
+            reg.emplace_back(std::wregex(L"^$", std::regex_constants::icase));
         }
-        reg.emplace_back(std::wregex(regStr, std::regex_constants::icase));
     }
 
     DBGLINE("Saving\n");
@@ -273,12 +282,12 @@ int main([[maybe_unused]]int argc, char** argv) {
         }
     }
 
-    std::cout << js.dump(2) << "\n";
-
     std::ifstream defaultsFile(gamePath.string() + "\\defaults\\defaults.tqi");
     json defaults;
     defaultsFile >> defaults;
     defaultsFile.close();
+
+    sf::Clock time;
 
     sf::Clock deltaTimeClock;
     float oldTime{};
@@ -303,11 +312,6 @@ int main([[maybe_unused]]int argc, char** argv) {
     float scrollSpeed{};
 
     std::vector<TextPrinter> printers;
-//    printers.emplace_back(TextPrinter(font, "First line.\nLololo Same text", sf::Color::White, pos));
-//    pos.y += printers[0].getBoundBox().y + 40.0;
-//    printers.emplace_back(TextPrinter(font, "This is second line (angry >:( ).", sf::Color::Red, pos, 64));
-//    pos.y += printers[1].getBoundBox().y + 40.0;
-//    printers.emplace_back(TextPrinter(font, "This is third line Yellow.", sf::Color::Yellow, pos, 24));
     std::string currentId = "start";
 
     std::ifstream saveFile(gamePath.string() + "\\save\\saveFile");
@@ -320,7 +324,7 @@ int main([[maybe_unused]]int argc, char** argv) {
     std::array<MusicPlayer, 2> musicPlayers;
     size_t currentPlayer{};
 
-    sf::Color backgroundColor = sf::Color::Black;
+    ColorFader backgroundColor(sf::Color(20, 20, 20));
     std::vector<std::wregex> regs;
 
     std::vector<sf::SoundBuffer> buffers;
@@ -340,7 +344,7 @@ int main([[maybe_unused]]int argc, char** argv) {
     sf::RectangleShape pad;
     pad.setSize({1600, 32 * 5});
     pad.setPosition({0, 900 - 32 * 5});
-    pad.setFillColor(backgroundColor);
+    pad.setFillColor(backgroundColor.getColor());
 
     sf::RenderTexture texture;
     texture.create(1600, 900);
@@ -380,9 +384,10 @@ int main([[maybe_unused]]int argc, char** argv) {
                                 currentId = js[currentId]["links"][i]["id"];
                                 pos.y = 100;
                                 fillBlock(currentId, js, defaults, printers, musicPlayers, currentPlayer, backgroundColor, input, message, regs, fonts, pos, shader, programPath, gamePath);
+                                time.restart();
                                 currentPrinter = 0;
                                 printers[currentPrinter].start();
-                                pad.setFillColor(backgroundColor);
+                                pad.setFillColor(backgroundColor.getColor());
                                 input.setActive(false);
                                 message.setString(L"");
                             }
@@ -433,15 +438,15 @@ int main([[maybe_unused]]int argc, char** argv) {
             input.processInput(event);
         }
 
-        if(printers[currentPrinter].getPosistion().y + printers[currentPrinter].getBoundBox().y > (float)(window.getSize().y - 32 * 5) && !printers[currentPrinter].finished()) {
+        if(printers[currentPrinter].getPosistion().y + printers[currentPrinter].getBoundBox().y > (float)(window.getSize().y - 32 * 6) && !printers[currentPrinter].finished()) {
             scrollSpeed -= 100.0f * dt;
         }
 
-        if(printers[currentPrinter].getPosistion().y < 0) {
+        if(printers[currentPrinter].getPosistion().y < 32) {
             scrollSpeed += 100.0f * dt;
         }
 
-        if(printers[0].getPosistion().y + printers[0].getBoundBox().y > (float)(window.getSize().y - 32 * 5)) {
+        if(printers[0].getPosistion().y + printers[0].getBoundBox().y > (float)(window.getSize().y - 32 * 6)) {
             scrollSpeed -= 100.0f * dt;
         }
 
@@ -453,6 +458,8 @@ int main([[maybe_unused]]int argc, char** argv) {
             input.setActive(true);
         }
 
+        backgroundColor.update(dt);
+
         for (auto &player : musicPlayers) {
             player.update(dt);
         }
@@ -463,7 +470,8 @@ int main([[maybe_unused]]int argc, char** argv) {
         }
         message.update();
 
-        texture.clear(backgroundColor);
+        pad.setFillColor(backgroundColor.getColor());
+        texture.clear(backgroundColor.getColor());
         for (auto &p : printers) {
             p.draw(texture);
         }
@@ -473,10 +481,10 @@ int main([[maybe_unused]]int argc, char** argv) {
         input.draw(texture);
 
         shader.setUniform("scale", (sf::Vector2f)window.getSize());
-        shader.setUniform("time", deltaTimeClock.getElapsedTime().asSeconds());
+        shader.setUniform("time", time.getElapsedTime().asSeconds());
         shader.setUniform("text", texture.getTexture());
 
-        window.clear(backgroundColor);
+        window.clear(backgroundColor.getColor());
         sf::RectangleShape drawRect;
         drawRect.setSize((sf::Vector2f)window.getSize());
         window.draw(drawRect, &shader);

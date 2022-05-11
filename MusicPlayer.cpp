@@ -37,7 +37,7 @@ void MusicPlayer::fadeOut() {
 void MusicPlayer::update(float dt) {
     if(m_fadingIn) {
         if (m_volume < m_maxVolume) {
-            m_volume += dt * 10;
+            m_volume += dt * 15;
         } else {
             m_volume = m_maxVolume;
             m_fadingIn = false;
@@ -46,7 +46,7 @@ void MusicPlayer::update(float dt) {
     }
     if(m_fadingOut) {
         if (m_volume > 0.0f) {
-            m_volume -= dt * 10;
+            m_volume -= dt * 15;
         } else {
             m_volume = 0.0;
             m_fadingOut = false;

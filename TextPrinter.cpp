@@ -5,6 +5,7 @@
 #include "TextPrinter.hpp"
 
 #include <iostream>
+#include <random>
 
 TextPrinter::TextPrinter(
         sf::Font const &font,
@@ -30,8 +31,19 @@ bool TextPrinter::isTyping() {
     return m_isTyping;
 }
 
+float randMinusOneToOne() {
+    return 2.0f * (((float)rand() / RAND_MAX) - 0.5f);
+}
+
 void TextPrinter::draw(sf::RenderTarget &window) {
+    sf::Vector2f randVec{randMinusOneToOne() * 3.0f, randMinusOneToOne() * 3.0f};
+    if(m_shaking) {
+        m_text.move(randVec);
+    }
     window.draw(m_text);
+    if(m_shaking) {
+        m_text.move(-randVec);
+    }
 }
 
 void TextPrinter::start() {
@@ -115,4 +127,8 @@ void TextPrinter::setTypingSound(std::string const &soundPath, float volume) {
     m_TypingSoundBuffer.loadFromFile(soundPath);
     m_TypingSound.setBuffer(m_TypingSoundBuffer);
     m_TypingSound.setVolume(volume);
+}
+
+void TextPrinter::setShaking(bool shaking) {
+    m_shaking = shaking;
 }

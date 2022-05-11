@@ -23,6 +23,7 @@ class TextPrinter {
     sf::Sound m_TypingSound;
     sf::SoundBuffer m_TypingSoundBuffer;
     bool m_withSound{false};
+    bool m_shaking{};
 
 public:
     TextPrinter() = delete;
@@ -58,6 +59,8 @@ public:
     void setColor(sf::Color const &col);
 
     void setFont(sf::Font const &font);
+
+    void setShaking(bool shaking);
 
     sf::Vector2f getPosistion();
 };
