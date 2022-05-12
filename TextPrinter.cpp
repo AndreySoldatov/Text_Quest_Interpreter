@@ -65,6 +65,7 @@ void TextPrinter::update() {
         if(m_typingString.size() < m_fullString.size()) {
             m_typingString += m_fullString[m_typingString.size()];
             m_text.setString(m_typingString);
+            //if(m_text)
             m_TypingSound.play();
         } else {
             m_isTyping = false;

@@ -20,6 +20,7 @@ made for ["The Tool Jam 2"](https://itch.io/jam/the-tool-jam-2).
 - [Saves, usage and misc](#saves-usage-and-misc)
 - [Defaults](#defaults)
 - [Multiple Source files](#multiple-source-files)
+- [Error Logging](#error-logging)
 
 # Quick Start
 To create your very own text quest first thing you need to do is to use ***Text Quest Interpreter Project Wizard TM***. Usage is simple:
@@ -31,17 +32,15 @@ In this project you will find the main script file: *YourProjectName*.tqi. This 
 
 ```json
 {
-  "start": {
     "lines": [
-      {
+        {
         "string": "Yoooo! This is an empty project!"
-      }
+        }
     ]
-  }
 }
 ```
 Here you can already see some hierarchy.
-To put it simple every TQI project consists of a collection of named **blocks**. For example in this case there is only one block named `start`. Every project must have a `start` block because Interpreter seeks `start` block to... well... start the quest. Think of it as `main` function in your programming languages.
+To put it simple every TQI project consists of a collection of named **blocks**. Each block has it's **unique** id, that is the **name** of the **file** that this block is in.
 
 Block may have a `links` **array** that contains all the formatted text line that are showed in this block. Each line element **must** have a `string` element to show this string to the screen. Otherwise ***at this moment*** the program will crash.
 
@@ -52,31 +51,30 @@ TQI interactivity is based on **blocks** and **links**.
 `links` is a special element of `block` that looks like this:
 
 ```json
-{
-    "start": {
-        "lines": [
-            {
-                "string": "Yoooo! This is an empty project!"
-            }
-        ],
-        "links": [
-            {
-                "keys": [
-                    "next",
-                    "further",
-                    "advance"
-                ],
-                "id": "end"
-            }
-        ]
-    },
-    "end": {
-        "lines": [
-            {
-                "string": "and this is second line!"
-            }
-        ]
-    }
+{ // FILE: start.tqi
+    "lines": [
+        {
+            "string": "Yoooo! This is an empty project!"
+        }
+    ],
+    "links": [
+        {
+            "keys": [
+                "next",
+                "further",
+                "advance"
+            ],
+            "id": "end"
+        }
+    ]
+}
+
+{ // FILE: end.tqi
+    "lines": [
+        {
+            "string": "and this is second line!"
+        }
+    ]
 }
 ```
 `links` defines an array of links (sorry for tautology) to other blocks of the game. Each link must contain `keys` element, that is also an array, that defines key-words (case insensitive) for the input command. For example if we have the keys like one above these inputs will trigger the link:
@@ -184,7 +182,7 @@ You can add even more customization by adding global block settings:
 
 - **font**: here you can specify ***font file*** for each of font styles:
 ```json
-"start": {
+{
     "lines": [
         {
             "string": "Yoooo! This is an empty project!"
@@ -202,7 +200,7 @@ font files are being taken from `fonts` subfolder of your game folder.
 
 - **backgoundColor**: color of the block background:
 ```json
-"start": {
+{
     "lines": [
         {
             "string": "Yoooo! This is an empty project!"
@@ -214,7 +212,7 @@ font files are being taken from `fonts` subfolder of your game folder.
 
 - **textColor**: this *global* textColor specifies color of input field and message string:
 ```json
-"start": {
+{
     "lines": [
         {
             "string": "Yoooo! This is an empty project!"
@@ -226,7 +224,7 @@ font files are being taken from `fonts` subfolder of your game folder.
 
 - **defaultMessage**: this field scpecifies the message that is being displayed if the input did not match any key. Something like `I don't know what you want from me, master` or something like that.
 ```json
-"start": {
+{
     "lines": [
         {
             "string": "Yoooo! This is an empty project!"
@@ -240,7 +238,7 @@ default value is: `Unknown command`
 
 - **music** this field represents the music that is being played when the block is shown. Works pretty much like `sound`: with `file` and `volume`:
 ```json
-"start": {
+{
     "lines": [
         {
             "string": "Yoooo! This is an empty project!"
@@ -257,7 +255,7 @@ Music file is being taken from `music` subfolder.
 And the sweetest part:
 - **shader**: specifies custom `.glsl` shader for the block:
 ```json
-"start": {
+{
     "lines": [
         {
             "string": "Yoooo! This is an empty project!"
@@ -329,5 +327,19 @@ Also you can specify default `"typingSound"` for the sound of printed text.
 # Multiple Source files
 You can add any number of `.tqi` in the `/src/` folder of your project.
 They behave exactly like the main `.tqi` file, and by that i mean that you can define block in them. You can even link to the blocks of the other file, they will all link together anyway.
+
+# Error Logging
+If your game crashes, and you want to know what exactly happened, you can look into `log/log.txt` file in your game directory and read the error report log.
+
+It formats the output in this way:
+```
+Problem block:
+	"blockID"
+
+Problem:
+	"Error string"
+```
+This way you can easely identify you problem, and eliminate it.
+Unfortunately the error logging coverage is not full yet, but I'm working on it, and right now it covers most of the error cases.
 
 Thats all you need to know about TQI folks!

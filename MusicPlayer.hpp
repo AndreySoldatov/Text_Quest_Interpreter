@@ -19,7 +19,7 @@ public:
     MusicPlayer() = default;
     MusicPlayer(std::string const &musicPath);
 
-    void setPath(std::string const &musicPath);
+    bool setPath(std::string const &musicPath);
 
     bool isSame(std::string const &musicPath);
 

@@ -14,10 +14,9 @@
   <component name="ChangeListManager">
     <list default="true" id="efea6ddf-9254-4bea-afa1-7fd1728f5893" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MusicPlayer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/MusicPlayer.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MusicPlayer.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/MusicPlayer.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TextPrinter.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/TextPrinter.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TextPrinter.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/TextPrinter.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/main.cpp" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -29,7 +28,7 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Release" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
@@ -83,7 +82,8 @@
       <workItem from="1652000673262" duration="12631000" />
       <workItem from="1652182986459" duration="518000" />
       <workItem from="1652183531354" duration="22124000" />
-      <workItem from="1652265541917" duration="11901000" />
+      <workItem from="1652265541917" duration="12189000" />
+      <workItem from="1652388830150" duration="7213000" />
     </task>
     <servers />
   </component>

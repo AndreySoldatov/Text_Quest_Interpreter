@@ -13,11 +13,12 @@ MusicPlayer::MusicPlayer(std::string const &musicPath) {
     m_musicSource.setLoop(true);
 }
 
-void MusicPlayer::setPath(std::string const &musicPath) {
+bool MusicPlayer::setPath(std::string const &musicPath) {
     m_musicPath = musicPath;
-    m_musicSource.openFromFile(m_musicPath);
+    bool res = m_musicSource.openFromFile(m_musicPath);
     m_musicSource.setVolume(m_volume);
     m_musicSource.setLoop(true);
+    return res;
 }
 
 void MusicPlayer::fadeIn(float maxVolume) {

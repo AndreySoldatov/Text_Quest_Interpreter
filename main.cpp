@@ -16,6 +16,19 @@
 
 using namespace nlohmann;
 
+void moveWindow(sf::RenderWindow &window, sf::Vector2i delta) {
+    window.setPosition({window.getPosition().x + delta.x, window.getPosition().y + delta.y});
+}
+
+void logError(std::filesystem::path const &gamePath, std::string const &id, std::string const &problem) {
+    if(!std::filesystem::exists(gamePath / "log\\")) {
+        std::filesystem::create_directory(gamePath / "log\\");
+    }
+    std::ofstream logDumper(gamePath / "log\\log.txt", std::ios::trunc);
+    logDumper << "Problem block:\n\t\"" << id << "\"\n\nProblem:\n\t\"" << problem << "\"\n";
+    logDumper.close();
+}
+
 void fillBlock(
         std::string const &id, json &js,
         json const &defaults,
@@ -34,6 +47,10 @@ void fillBlock(
     DBGLINE("Loading music");
 
     if(js[id].contains("music")) {
+        if(!js[id]["music"].contains("file")) {
+            logError(gamePath, id, "Music object does not contain a file field");
+        }
+
         std::string musicPath = gamePath.string() + "\\music\\" + (std::string)js[id]["music"]["file"];
         float volume{100};
         if(js[id]["music"].contains("volume")) {
@@ -42,7 +59,10 @@ void fillBlock(
         if(!players[currentPlayer].isSame(musicPath)) {
             players[currentPlayer].fadeOut();
             currentPlayer = (currentPlayer + 1) % 2;
-            players[currentPlayer].setPath(musicPath);
+            if(!players[currentPlayer].setPath(musicPath)) {
+                logError(gamePath, id, "Cannot open music file");
+                std::exit(1);
+            }
             players[currentPlayer].fadeIn(volume);
         } else {
             players[currentPlayer].setVolume(volume);
@@ -56,74 +76,84 @@ void fillBlock(
     bool jsContainsFont{js[id].contains("font")};
     bool defaultsContainsFont{defaults.contains("font")};
 
+    bool allFontsLoaded = true;
     if(jsContainsFont) {
         if(js[id]["font"].contains("regular")) {
-            fonts[0].loadFromFile(gamePath.string() + "\\fonts\\" + (std::string) js[id]["font"]["regular"]);
+            allFontsLoaded = allFontsLoaded && fonts[0].loadFromFile(gamePath.string() + "\\fonts\\" + (std::string) js[id]["font"]["regular"]);
         }
     } else if(defaultsContainsFont) {
         if(defaults["font"].contains("regular")) {
-            fonts[0].loadFromFile(gamePath.string() + "\\fonts\\" + (std::string) defaults["font"]["regular"]);
+            allFontsLoaded = allFontsLoaded && fonts[0].loadFromFile(gamePath.string() + "\\fonts\\" + (std::string) defaults["font"]["regular"]);
         }
     } else {
-        fonts[0].loadFromFile((programPath / "fonts\\regular.ttf").string());
+        allFontsLoaded = allFontsLoaded && fonts[0].loadFromFile((programPath / "fonts\\regular.ttf").string());
     }
     DBGLINE("\tLoaded regular");
 
     if(jsContainsFont) {
         if(js[id]["font"].contains("italic")) {
-            fonts[1].loadFromFile(gamePath.string() + "\\fonts\\" + (std::string) js[id]["font"]["italic"]);
+            allFontsLoaded = allFontsLoaded && fonts[1].loadFromFile(gamePath.string() + "\\fonts\\" + (std::string) js[id]["font"]["italic"]);
         }
     } else if(defaultsContainsFont) {
         if(defaults["font"].contains("italic")) {
-            fonts[1].loadFromFile(gamePath.string() + "\\fonts\\" + (std::string) defaults["font"]["italic"]);
+            allFontsLoaded = allFontsLoaded && fonts[1].loadFromFile(gamePath.string() + "\\fonts\\" + (std::string) defaults["font"]["italic"]);
         }
     } else {
-        fonts[1].loadFromFile((programPath / "fonts\\italic.ttf").string());
+        allFontsLoaded = allFontsLoaded && fonts[1].loadFromFile((programPath / "fonts\\italic.ttf").string());
     }
     DBGLINE("\tLoaded italic");
 
     if(jsContainsFont) {
         if(js[id]["font"].contains("bold")) {
-            fonts[2].loadFromFile(gamePath.string() + "\\fonts\\" + (std::string) js[id]["font"]["bold"]);
+            allFontsLoaded = allFontsLoaded && fonts[2].loadFromFile(gamePath.string() + "\\fonts\\" + (std::string) js[id]["font"]["bold"]);
         }
     } else if(defaultsContainsFont) {
         if(defaults["font"].contains("bold")) {
-            fonts[2].loadFromFile(gamePath.string() + "\\fonts\\" + (std::string) defaults["font"]["bold"]);
+            allFontsLoaded = allFontsLoaded && fonts[2].loadFromFile(gamePath.string() + "\\fonts\\" + (std::string) defaults["font"]["bold"]);
         }
     } else {
-        fonts[2].loadFromFile((programPath / "fonts\\bold.ttf").string());
+        allFontsLoaded = allFontsLoaded && fonts[2].loadFromFile((programPath / "fonts\\bold.ttf").string());
     }
     DBGLINE("\tLoaded bold");
 
     if(jsContainsFont) {
         if(js[id]["font"].contains("boldItalic")) {
-            fonts[3].loadFromFile(gamePath.string() + "\\fonts\\" + (std::string) js[id]["font"]["boldItalic"]);
+            allFontsLoaded = allFontsLoaded && fonts[3].loadFromFile(gamePath.string() + "\\fonts\\" + (std::string) js[id]["font"]["boldItalic"]);
         }
     } else if(defaultsContainsFont) {
         if(defaults["font"].contains("boldItalic")) {
-            fonts[3].loadFromFile(gamePath.string() + "\\fonts\\" + (std::string) defaults["font"]["boldItalic"]);
+            allFontsLoaded = allFontsLoaded && fonts[3].loadFromFile(gamePath.string() + "\\fonts\\" + (std::string) defaults["font"]["boldItalic"]);
         }
     } else {
-        fonts[3].loadFromFile((programPath / "fonts\\boldItalic.ttf").string());
+        allFontsLoaded = allFontsLoaded && fonts[3].loadFromFile((programPath / "fonts\\boldItalic.ttf").string());
     }
     DBGLINE("\tLoaded boldItalic");
+    if(!allFontsLoaded) {
+        logError(gamePath, id, "Cannot load font");
+        std::exit(1);
+    }
 
     DBGLINE("Loading shader");
+    bool loadedShader = true;
     if(js[id].contains("shader")) {
         std::ifstream ifs(gamePath.string() + "\\shaders\\" + (std::string)js[id]["shader"]);
         std::stringstream ss;
         ss << ifs.rdbuf();
-        shader.loadFromMemory(ss.str(), sf::Shader::Fragment);
+        loadedShader = loadedShader && shader.loadFromMemory(ss.str(), sf::Shader::Fragment);
     } else if(defaults.contains("shader")) {
         std::ifstream ifs(gamePath.string() + "\\shaders\\" + (std::string)defaults["shader"]);
         std::stringstream ss;
         ss << ifs.rdbuf();
-        shader.loadFromMemory(ss.str(), sf::Shader::Fragment);
+        loadedShader = loadedShader && shader.loadFromMemory(ss.str(), sf::Shader::Fragment);
     } else {
         std::ifstream ifs(programPath.string() + "\\shader\\default.glsl");
         std::stringstream ss;
         ss << ifs.rdbuf();
-        shader.loadFromMemory(ss.str(), sf::Shader::Fragment);
+        loadedShader = loadedShader && shader.loadFromMemory(ss.str(), sf::Shader::Fragment);
+    }
+    if(!loadedShader) {
+        logError(gamePath, id, "Cannot load or compile shader");
+        std::exit(1);
     }
 
     DBGLINE("Loading bgColor");
@@ -192,6 +222,10 @@ void fillBlock(
             del = defaults["del"];
         }
 
+        if(!line.contains("string")) {
+            logError(gamePath, id, "Some line does not contain the \"string\" element");
+            std::exit(1);
+        }
         printers.emplace_back(TextPrinter(
                 fonts[fontIndex],
                 converter.from_bytes(line["string"]),
@@ -263,24 +297,32 @@ int main([[maybe_unused]]int argc, char** argv) {
     std::filesystem::path programPath = argv[0];
     programPath = programPath.parent_path();
     std::filesystem::path gamePath = argv[1];
+
+    std::string mainBlockName = gamePath.stem().string();
+
     gamePath = gamePath.parent_path();
 
     std::cout << programPath.string() << std::endl;
 
+    json js; // Main JSON of the game
+
     std::ifstream ifs(argv[1]);
-    json js;
-    ifs >> js;
+    json mainFileJson;
+    ifs >> mainFileJson;
     ifs.close();
 
+    js.emplace(mainBlockName, mainFileJson);
+
     for(auto &f : std::filesystem::directory_iterator(gamePath / "src")) {
+        std::string fileName = f.path().stem().string();
         std::ifstream tmpIfs(f.path());
         json tmpJs;
         tmpIfs >> tmpJs;
         tmpIfs.close();
-        for (auto &element : tmpJs.items()) {
-            js.emplace(element.key(), element.value());
-        }
+        js.emplace(fileName, tmpJs);
     }
+
+    std::string currentId = mainBlockName;
 
     std::ifstream defaultsFile(gamePath.string() + "\\defaults\\defaults.tqi");
     json defaults;
@@ -312,7 +354,10 @@ int main([[maybe_unused]]int argc, char** argv) {
     float scrollSpeed{};
 
     std::vector<TextPrinter> printers;
-    std::string currentId = "start";
+
+    if(!std::filesystem::exists(gamePath / "save\\")) {
+        std::filesystem::create_directory(gamePath / "save\\");
+    }
 
     std::ifstream saveFile(gamePath.string() + "\\save\\saveFile");
     if(saveFile.good()) {
@@ -352,6 +397,9 @@ int main([[maybe_unused]]int argc, char** argv) {
     shader.setUniform("scale", sf::Vector2f{1600, 900});
 
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+
+    sf::Vector2i mousePos;
+    sf::Vector2i oldMousePos;
 
     while (window.isOpen()) {
         dt = deltaTimeClock.getElapsedTime().asSeconds() - oldTime;
@@ -458,6 +506,12 @@ int main([[maybe_unused]]int argc, char** argv) {
             input.setActive(true);
         }
 
+        oldMousePos = mousePos;
+        mousePos = sf::Mouse::getPosition();
+        if(sf::Mouse::isButtonPressed(sf::Mouse::Left) && window.hasFocus()) {
+            moveWindow(window, {mousePos.x - oldMousePos.x, mousePos.y - oldMousePos.y});
+        }
+
         backgroundColor.update(dt);
 
         for (auto &player : musicPlayers) {
@@ -488,16 +542,8 @@ int main([[maybe_unused]]int argc, char** argv) {
         sf::RectangleShape drawRect;
         drawRect.setSize((sf::Vector2f)window.getSize());
         window.draw(drawRect, &shader);
-//        for (auto &p : printers) {
-//            p.draw(window);
-//        }
-//
-//        window.draw(pad);
-//        message.draw(window);
-//        input.draw(window);
 
         window.display();
     }
-    
     return 0;
 }
